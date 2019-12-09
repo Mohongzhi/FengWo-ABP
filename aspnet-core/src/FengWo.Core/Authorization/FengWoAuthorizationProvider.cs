@@ -16,6 +16,7 @@ namespace FengWo.Authorization
             context.CreatePermission(PermissionNames.Pages_Menus, L("Menus"));
             context.CreatePermission(PermissionNames.Pages_SystemManage, L("SystemManage"));
             context.CreatePermission(PermissionNames.Pages_Tenants, L("Tenants"), multiTenancySides: MultiTenancySides.Host);
+            context.CreatePermission(PermissionNames.Pages_Orgnizations, L("Orgnizations"));
 
             context.CreatePermission(PermissionNames.Pages_Administration_HangfireDashboard, L("HangfireDashboard"));
 

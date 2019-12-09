@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FengWo.Dtos.Interface
+﻿namespace FengWo.Dtos.Interface
 {
     public interface ILimitedResultRequest
     {

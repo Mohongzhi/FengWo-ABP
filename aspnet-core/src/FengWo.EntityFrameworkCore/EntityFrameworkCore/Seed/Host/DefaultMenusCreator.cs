@@ -29,6 +29,7 @@ namespace FengWo.EntityFrameworkCore.Seed.Host
                 new Menu(){ Name = "Users", LocalizationName = "Users",Url="Users",Icon="people", RequiredPermissionName= PermissionNames.Pages_Users, ParentMenuName="SystemManage",RequiresAuthentication=true },
                 new Menu(){ Name = "Roles", LocalizationName = "Roles",Url="Roles",Icon="local_offer", RequiredPermissionName= PermissionNames.Pages_Roles, ParentMenuName="SystemManage",RequiresAuthentication=true},
                 new Menu(){ Name = "Menus", LocalizationName = "Menus",Url="Menus",Icon="reorder", RequiredPermissionName= PermissionNames.Pages_Menus, ParentMenuName="SystemManage",RequiresAuthentication=true},
+                new Menu(){ Name = "Orgnizations", LocalizationName = "Orgnizations",Url="OrgnizationUnit",Icon="group", RequiredPermissionName= PermissionNames.Pages_Orgnizations, ParentMenuName="SystemManage",RequiresAuthentication=true},
 
             };
         }

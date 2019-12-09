@@ -1,0 +1,140 @@
+@using System.Globalization
+@using FengWo.Web.Startup
+@{
+    ViewBag.CurrentPageName = PageNames.Orgnizations; // The menu item will be active for this page.//请修改页名
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link href="~/lib/bootstrap-table/dist/bootstrap-table.css" rel="stylesheet" />
+<script src="~/lib/bootstrap-table/dist/bootstrap-table.js"></script>
+<script src="~/lib/bootstrap-table/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="~/lib/vue/dist/vue.min.js"></script>
+
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    组织架构
+                </h2>
+            </div>
+            <div class="body table-responsive">
+
+                <table id="table" ></table>
+
+                <button type="button" class="btn btn-primary waves-effect waves-float pull-right" onclick="Create()" data-toggle="modal">
+                    <i class="material-icons">add</i>新增</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="CreateModalLabel" tabindex="-1" role="dialog" aria-labelledby="CreateModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span>@L("CreateEdit")</span>
+                </h4>
+            </div>
+            <div id="ForEditDiv" class="modal-body">
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane animated fadeIn active" id="create-tab">
+                        <div class="row clearfix" style="margin-top:10px;">
+                            
+                            <div class="col-sm-12">
+                                <div class="form-group form-float">
+                                    <div class="form-line focused">
+                                        <input class="form-control" type="text" id="DisplayName" v-model="DisplayName" required minlength="2">
+                                        <label class="form-label">名称</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">@L("Cancel")</button>
+                    <button type="submit" id="BtnSave" onclick="Save()" class="btn btn-primary waves-effect">@L("Save")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+     var obj = {};
+     var modalVue = null;
+
+$     (function () {
+         obj.id=null;
+         obj.DisplayName='';
+         modalVue = new Vue({ el: '#ForEditDiv',data: obj});
+     });
+     var locale = '@CultureInfo.CurrentUICulture.Name';
+     if (locale == 'zh-Hans') {locale = "zh-CN";}
+     var table = $('#table');
+     table.bootstrapTable({
+         url: abp.appPath + 'api/services/app/OrgnizationUnit/GetOrgnizationUnitByPagenation',
+         locale:locale,
+         queryParamsType: 'limit',sidePagination: 'server',silentSort: false,
+         pagination: true,search: true,sortable: true,sortName: 'id',
+         pageSize: 10,
+         columns: [
+             {field: 'id',title: 'ID',visible: false,},
+             {
+                 title: '@L("Actions")',field:'actions',
+                 formatter: function (val, row, index) {
+                     return '<a onclick="Update(' + row.id + ')" role="button" ><i class="material-icons">edit</i></a><a href="#" onclick="DeleteById(' + row.id + ')" data-menu-id="' + row.id + '"><i class="material-icons">delete_sweep</i></a>';
+                 }
+             },
+             {
+                 field: 'displayName', sortable: true, title: '名称'
+             },
+         ],
+
+         responseHandler: function (res) {return res.result;}
+     });
+
+     function Save() {
+         abp.services.app.orgnizationUnit.createOrUpdateOrgnizationUnit(obj, null).done(function () {
+             $('#CreateModalLabel').modal('hide');
+             table.bootstrapTable('refresh');
+         }).fail(function (data) {
+             abp.message.error('保存失败! 请重试...', '提示', false);
+         });
+     }
+
+     function DeleteById(id) {
+         abp.message.confirm('是否要删除此行数据?', '提示', function (data) {
+             if (data) {
+                 abp.services.app.orgnizationUnit.deleteOrgnizationUnitById(id, null).done(function () {
+                     table.bootstrapTable('refresh');
+                     abp.message.success('删除成功', '', false);
+                 }).fail(function () {
+                     table.bootstrapTable('refresh');
+                     abp.message.error('删除失败', '', false);
+                 });
+             }
+         }, false);
+     }
+
+     function Create() {
+         obj.id=null;
+         obj.DisplayName='';
+         delete obj.id;
+         $('#CreateModalLabel').modal('show');
+     }
+
+     function Update(id) {
+         abp.services.app.orgnizationUnit.getOrgnizationUnitById(id, null).done(function (data) {
+             obj.id = data.id;
+             obj.DisplayName = data.displayName;
+             $('#CreateModalLabel').modal('show');
+         }).fail(function (data) {
+             abp.message.error('修改失败', '', false);
+         });
+     }
+</script>

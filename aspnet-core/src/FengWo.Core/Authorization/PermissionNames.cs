@@ -27,6 +27,11 @@
         public const string Pages_Menus = "Pages.Menus";
 
         /// <summary>
+        /// 组织架构
+        /// </summary>
+        public const string Pages_Orgnizations = "Pages.Orgnizations";
+
+        /// <summary>
         /// 系统管理
         /// </summary>
         public const string Pages_SystemManage = "Pages.SystemManage";
