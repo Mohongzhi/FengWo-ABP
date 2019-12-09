@@ -22,7 +22,6 @@ namespace FengWo.EntityFrameworkCore
         /// 消息通知
         /// </summary>
         public DbSet<Message> Messages { get; set; }
-
         #endregion
 
         public FengWoDbContext(DbContextOptions<FengWoDbContext> options)
