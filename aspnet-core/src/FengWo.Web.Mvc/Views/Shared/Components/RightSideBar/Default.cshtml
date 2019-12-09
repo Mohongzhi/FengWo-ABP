@@ -1,0 +1,77 @@
+@using FengWo.Configuration.Ui
+@model FengWo.Web.Views.Shared.Components.RightSideBar.RightSideBarViewModel
+<aside id="rightsidebar" class="right-sidebar">
+    <ul class="nav nav-tabs tab-nav-right" role="tablist">
+        <li role="presentation" class="active"><a href="#skins" data-toggle="tab">@L("Skins")</a></li>
+        <li role="presentation"><a href="#settings" data-toggle="tab">@L("Settings")</a></li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane fade in active in active" id="skins">
+            <ul class="demo-choose-skin">
+                @foreach (var theme in UiThemes.All)
+                {
+                    <li data-theme="@theme.CssClass" class="@(theme.CssClass == Model.CurrentTheme.CssClass ? "active" : "")">
+                        <div class="@theme.CssClass"></div>
+                        <span>@L(@theme.Name)</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="settings">
+            <div class="demo-settings">
+                <p>@L("ChangePassword")</p>
+                <div class="col-sm-12">
+                    <div class="form-group form-float">
+                        <div class="form-line p-t-10">
+                            <input id="CurrentPassword" type="password" class="form-control" required>
+                            <label class="form-label">@L("CurrentPassword")</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group form-float">
+                        <div class="form-line p-t-10">
+                            <input id="NewPassword" type="password" class="form-control" required>
+                            <label class="form-label">@L("NewPassword")</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <button id="btnSaveResetPassword" class="btn btn-primary pull-right m-r-25">@L("Submit")</button>
+                </div>
+                <p>SYSTEM SETTINGS</p>
+                <ul class="setting-list">
+                    <li>
+                        <span>Notifications</span>
+                        <div class="switch">
+                            <label><input type="checkbox" checked><span class="lever"></span></label>
+                        </div>
+                    </li>
+                    <li>
+                        <span>Auto Updates</span>
+                        <div class="switch">
+                            <label><input type="checkbox" checked><span class="lever"></span></label>
+                        </div>
+                    </li>
+                </ul>
+                <p>ACCOUNT SETTINGS</p>
+                <ul class="setting-list">
+                    <li>
+                        <span>Offline</span>
+                        <div class="switch">
+                            <label><input type="checkbox"><span class="lever"></span></label>
+                        </div>
+                    </li>
+                    <li>
+                        <span>Location Permission</span>
+                        <div class="switch">
+                            <label><input type="checkbox" checked><span class="lever"></span></label>
+                        </div>
+                    </li>
+                </ul>
+
+                @*<p style="color: red;">This settings are just for demonstration!</p>*@
+            </div>
+        </div>
+    </div>
+</aside>

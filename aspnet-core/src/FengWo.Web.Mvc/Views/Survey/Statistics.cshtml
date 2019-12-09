@@ -1,0 +1,685 @@
+﻿@using System.Globalization
+@using FengWo.Web.Startup
+
+@{
+    ViewBag.CurrentPageName = PageNames.SurveyStatistics; // The menu item will be active for this page.
+}
+@*<script src="~/lib/jquery/dist/jquery.min.js"></script>*@
+<script src="~/lib/vue/dist/vue.min.js"></script>
+<link href="~/node_modules/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+<link href="~/node_modules/form-making/dist/FormMaking.css" rel="stylesheet" />
+<script src="~/node_modules/element-ui/lib/index.js"></script>
+<script src="~/node_modules/form-making/dist/FormMaking.umd.min.js"></script>
+<script src="~/node_modules/form-making/public/lib/ace/src-min/ace.js"></script>
+<script src="~/lib/chart.js/dist/Chart.min.js"></script>
+<script src="~/lib/jquery-countTo/jquery.countTo.js" asp-append-version="true"></script>
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    @L("SurveyStatistics")
+                </h2>
+            </div>
+            <div class="body table-responsive" id="app" v-loading="loading">
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                        <div class="info-box bg-cyan hover-expand-effect">
+                            <div class="icon">
+                                <i class="material-icons">group</i>
+                            </div>
+                            <div class="content">
+                                <div class="text">总答卷人数</div>
+                                <div class="number count-to" data-from="0" v-bind:data-to="totalCount" data-speed="1000" data-fresh-interval="10"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <el-form>
+                    <el-form-item label="统计分类">
+                        <el-select v-model="SType" placeholder="请选择" clearable>
+                            <el-option v-for="item in STypeOptions"
+                                       :key="item.key"
+                                       :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-button type="primary" @@click="GetALLPC">
+                            查询
+                        </el-button>
+                    </el-form-item>
+                    <el-form-item label="一级指标">
+                        <el-select v-model="PC" placeholder="请选择">
+                            <el-option v-for="item in PCOptions"
+                                       :key="item.key"
+                                       :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-button type="primary" @@click="GetPCInner">
+                            查询所属二级指标
+                        </el-button>
+                    </el-form-item>
+
+                    <el-form-item label="二级指标">
+                        <el-select v-model="SC" placeholder="请选择" @@change="OnChooseSC">
+                            <el-option v-for="item in SCOptions"
+                                       :key="item.key"
+                                       :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-select v-model="questionItem" placeholder="请选择" v-if="SC&&ItemOptions.length>0">
+                            <el-option v-for="item in ItemOptions"
+                                       :key="item.key"
+                                       :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-button type="primary" @@click="GetSCInner">
+                            查询
+                        </el-button>
+                        <el-button typeof="primary" @@click="DownloadPicture" icon="el-icon-download">
+                            下载图表
+                        </el-button>
+                    </el-form-item>
+
+
+                </el-form>
+                <div id="charts">
+                    <canvas id="PCFullChart" class="hidden"></canvas>
+
+                    <canvas id="allPCChart" class="hidden"></canvas>
+
+                    <canvas id="pieChart" height="150" class="hidden"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/lib/Flot/jquery.flot.js"></script>
+<script src="~/lib/Flot/jquery.flot.resize.js"></script>
+<script src="~/lib/Flot/jquery.flot.pie.js"></script>
+<script src="~/lib/Flot/jquery.flot.categories.js"></script>
+<script src="~/lib/Flot/jquery.flot.time.js"></script>
+<script>
+
+    var obj = {
+        loading:false,
+        questionnaireItemId:@ViewBag.Id,
+        PCOptions: null,
+        SCOptions: null,
+        PC: null,
+        totalCount:0,
+        SC: null,
+        SType: null,
+        STypeOptions: [//{ label: '学年学期', value: '学年学期' },
+            { label: '校区', value: '校区' }, { label: '院系', value: '院系' },
+            { label: '专业', value: '专业' }, { label: '班级', value: '班级' }],
+        questionItem: null,
+        ItemOptions:[]
+    };
+
+    var allFullPC = null;
+    var allPC = null;
+    var pieChart = null;
+
+    var objVue = null;
+    $(function () {
+
+        abp.services.app.basicDataMaintenance.getSelectByKeyword('PCKey', null).done(function (data) {
+            obj.PCOptions = data;
+        });
+
+        abp.services.app.basicDataMaintenance.getSelectByKeyword('SCKey', null).done(function (data) {
+            obj.SCOptions = data;
+        });
+
+        abp.services.app.questionnaire.getTotalAnswerCount(obj.questionnaireItemId).done(function (data) {
+            obj.totalCount = data;
+        });
+
+        objVue = new Vue({
+            el: '#app',
+            data: obj,
+            methods: {
+                GetPCInner: function () {
+                    obj.loading = true;
+                    if (obj.PC == null) {
+                        objVue.$message({ message: '请选择一级指标', type: 'warning' });
+                        obj.loading = false;
+                        return;
+                    }
+                    HideAllChart();
+                    var dto = { questionnaireItemId: obj.questionnaireItemId, pCId: obj.PC };
+                    abp.services.app.questionnaire.getPCStatisticsByQuestionnaireItemId(dto, null).done(function (data) {
+                        $('#allPCChart').removeClass('hidden');
+                        obj.loading = false;
+
+                        var ctx = document.getElementById('allPCChart');
+                        allPC = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.labels,
+                                datasets: [{
+                                    label: '二级指标满意率',
+                                    data: data.values,
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                },
+                                animation: {           // 这部分是数值显示的功能实现
+                                    onComplete: function () {
+                                        var chartInstance = this.chart,
+
+                                            ctx = chartInstance.ctx;
+                                        // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                        ctx.fillStyle = "black";
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+
+                                        this.data.datasets.forEach(function (dataset, i) {
+                                            var meta = chartInstance.controller.getDatasetMeta(i);
+                                            meta.data.forEach(function (bar, index) {
+                                                var data = dataset.data[index];
+                                                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                                            });
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
+                         $('.count-to').countTo();
+
+                    });
+                },
+                GetALLPC: function () {
+                    if (obj.SType == null || obj.SType == "")
+                        GetFullPC();
+                    else {
+                        GetFullPCType();
+                    }
+                },
+                OnChooseSC: function () {
+                    abp.services.app.questionnaire.getQuestionnaireLinkagesBySecondryId(obj.questionnaireItemId, obj.SC, null).done(function (data) {
+                        obj.questionItem = null;
+                        obj.ItemOptions = data;
+                    });
+                },
+                GetSCInner: function () {
+                    if (obj.ItemOptions.length>0&&(obj.questionItem == null || obj.questionItem == '')) {
+                        objVue.$message({ message: '请选择详细项目', type: 'warning' }); return;
+                    }
+                    abp.services.app.questionnaire.getSCStatisticsByKeyName(obj.questionnaireItemId, obj.questionItem, null).done(function (data) {
+                        HideAllChart();
+                        if (data.title == 'rate') {
+                            $('#allPCChart').removeClass('hidden');
+                            obj.loading = false;
+                            var ctx = document.getElementById('allPCChart');
+                            allPC = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: '二级指标子满意率',
+                                        data: data.values,
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.2)',
+                                            'rgba(54, 162, 235, 0.2)',
+                                            'rgba(255, 206, 86, 0.2)',
+                                            'rgba(75, 192, 192, 0.2)',
+                                            'rgba(153, 102, 255, 0.2)',
+                                            'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            'rgba(255, 99, 132, 1)',
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            'rgba(75, 192, 192, 1)',
+                                            'rgba(153, 102, 255, 1)',
+                                            'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }]
+                                    },
+                                    animation: {           // 这部分是数值显示的功能实现
+                                        onComplete: function () {
+                                            var chartInstance = this.chart,
+
+                                                ctx = chartInstance.ctx;
+                                            // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                            ctx.fillStyle = "black";
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'bottom';
+
+                                            this.data.datasets.forEach(function (dataset, i) {
+                                                var meta = chartInstance.controller.getDatasetMeta(i);
+                                                meta.data.forEach(function (bar, index) {
+                                                    var data = dataset.data[index];
+                                                    ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                                                });
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        if (data.title == 'checkbox') {
+                            $('#pieChart').removeClass('hidden');
+                            obj.loading = false;
+                            var ctx = document.getElementById('pieChart');
+                            allPC = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: '选择项人数对比',
+                                        data: data.values,
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.2)',
+                                            'rgba(54, 162, 235, 0.2)',
+                                            'rgba(255, 206, 86, 0.2)',
+                                            'rgba(75, 192, 192, 0.2)',
+                                            'rgba(153, 102, 255, 0.2)',
+                                            'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            'rgba(255, 99, 132, 1)',
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            'rgba(75, 192, 192, 1)',
+                                            'rgba(153, 102, 255, 1)',
+                                            'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    animation: {           // 这部分是数值显示的功能实现
+                                        onComplete: function () {
+                                            var chartInstance = this.chart,
+
+                                                ctx = chartInstance.ctx;
+                                            // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize+10, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                            ctx.fillStyle = "black";
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'bottom';
+
+                                            this.data.datasets.forEach(function (dataset, i) {
+                                                var meta = chartInstance.controller.getDatasetMeta(i);
+                                                meta.data.forEach(function (bar, index) {
+                                                    var data = dataset.data[index];
+                                                    ctx.fillText(data, bar._model.x + (bar._model.startAngle*7), bar._model.y +(bar._model.startAngle*10) - 5);
+                                                });
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        if (data.title == 'radio') {
+                             $('#allPCChart').removeClass('hidden');
+                            obj.loading = false;
+                            var ctx = document.getElementById('allPCChart');
+                            allPC = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: '选择次数',
+                                        data: data.values,
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.2)',
+                                            'rgba(54, 162, 235, 0.2)',
+                                            'rgba(255, 206, 86, 0.2)',
+                                            'rgba(75, 192, 192, 0.2)',
+                                            'rgba(153, 102, 255, 0.2)',
+                                            'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            'rgba(255, 99, 132, 1)',
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            'rgba(75, 192, 192, 1)',
+                                            'rgba(153, 102, 255, 1)',
+                                            'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }]
+                                    },
+                                    animation: {           // 这部分是数值显示的功能实现
+                                        onComplete: function () {
+                                            var chartInstance = this.chart,
+
+                                                ctx = chartInstance.ctx;
+                                            // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                            ctx.fillStyle = "black";
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'bottom';
+
+                                            this.data.datasets.forEach(function (dataset, i) {
+                                                var meta = chartInstance.controller.getDatasetMeta(i);
+                                                meta.data.forEach(function (bar, index) {
+                                                    var data = dataset.data[index];
+                                                    ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                                                });
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                },
+                DownloadPicture: function () {
+                    var id = '';
+                    if (!$('#PCFullChart').hasClass('hidden')) {
+                        id = 'PCFullChart';
+                    }
+                    if (!$('#allPCChart').hasClass('hidden')) {
+                        id = 'allPCChart';
+                    }
+                    if (!$('#pieChart').hasClass('hidden')) {
+                        id = 'pieChart';
+                    }
+
+                    var chart = document.createElement("a");
+        chart.href = document.getElementById(id).toDataURL();
+        chart.download = 'pic'+".jpg";
+        chart.click();
+                }
+            }
+        });
+
+        GetFullPC();
+    });
+
+    function HideAllChart() {
+        if (allFullPC) {
+            allFullPC.destroy();
+            $('#PCFullChart').addClass('hidden');
+        }
+        if (allPC) {
+            allPC.destroy();
+            $('#allPCChart').addClass('hidden');
+        }
+        if (pieChart) {
+            pieChart.destroy();
+            $('#pieChart').addClass('hidden');
+        }
+    }
+
+   function GetFullPC() {
+                    obj.loading = true;
+                    HideAllChart();
+                    $('#PCFullChart').removeClass('hidden');
+                    abp.services.app.questionnaire.getPCFullStatisticsByQuestionnaireItemId(obj.questionnaireItemId, null).done(function (data) {
+                        $('#PCFullChart').removeClass('hidden');
+                        obj.loading = false;
+                         $('.count-to').countTo();
+
+                        var ctx = document.getElementById('PCFullChart');
+                        allFullPC = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: data.labels,
+        datasets: [{
+            label: '一级指标满意率',
+            data: data.values,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                animation: {           // 这部分是数值显示的功能实现
+                    onComplete: function () {
+                        var chartInstance = this.chart,
+
+                            ctx = chartInstance.ctx;
+                        // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.fillStyle = "black";
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+
+                        this.data.datasets.forEach(function (dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function (bar, index) {
+                                var data = dataset.data[index];
+                                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                            });
+                        });
+                    }
+                }
+            }
+});
+                    });
+    }
+    var backGroundColor = [
+        [
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+        ],
+        [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+        ],
+        [
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+        ],
+        [
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+        ],
+        [
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+        ],
+        [
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+        ],];
+    var borderColor = [
+        [
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+        ],
+        [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+        ],
+        [
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],[
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],[
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],[
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ]
+    ];
+    function GetFullPCType() {
+        obj.loading = true;
+        HideAllChart();
+        abp.services.app.questionnaire.getPCFullStatisticsByType(obj.questionnaireItemId, obj.SType, null).done(function (data) {
+            obj.loading = false;
+            var arr = [];
+            for (var i = 0; i < data.questionnaireStatisticsOutputDtos.length; i++) {
+                arr.push({
+                    label: data.questionnaireStatisticsOutputDtos[i].title,
+                    data: data.questionnaireStatisticsOutputDtos[i].values,
+                    backgroundColor: backGroundColor[i],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                });
+
+            }
+            $('#PCFullChart').removeClass('hidden');
+            var ctx = document.getElementById('PCFullChart');
+            allFullPC = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: data.labels,
+        datasets: arr
+    },
+    options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                animation: {           // 这部分是数值显示的功能实现
+                    onComplete: function () {
+                        var chartInstance = this.chart,
+                            ctx = chartInstance.ctx;
+                        // 以下属于canvas的属性（font、fillStyle、textAlign...）
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.fillStyle = "black";
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+
+                        this.data.datasets.forEach(function (dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function (bar, index) {
+                                var data = dataset.data[index];
+                                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                            });
+                        });
+                    }
+                }
+            }
+});
+        })
+    }
+</script>
+

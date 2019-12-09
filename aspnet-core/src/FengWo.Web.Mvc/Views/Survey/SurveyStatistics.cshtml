@@ -1,0 +1,102 @@
+﻿@using System.Globalization
+@using FengWo.Web.Startup
+
+@{
+    ViewBag.CurrentPageName = PageNames.SurveyStatistics; // The menu item will be active for this page.
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link href="~/lib/bootstrap-table/dist/bootstrap-table.css" rel="stylesheet" />
+<script src="~/lib/bootstrap-table/dist/bootstrap-table.js"></script>
+<script src="~/lib/bootstrap-table/dist/bootstrap-table-locale-all.min.js"></script>
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    @L("SurveyStatistics")
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table id="table"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+     var locale = '@CultureInfo.CurrentUICulture.Name';
+    var local = '@CultureInfo.CurrentUICulture.Name';
+    if (local == 'zh-Hans') {
+        locale = "zh-CN";
+    }
+    var table = $('#table');
+
+     table.bootstrapTable({
+        url: abp.appPath + 'api/services/app/Questionnaire/GetQuestionnaires',
+        locale:locale,
+        buttonsAlign:'right',
+        pageSize: 10,
+        showColumns:true,
+        showRefresh:true,
+        showExport:true,
+        queryParamsType: 'limit',
+        sidePagination: 'server',
+        silentSort: false,
+        pagination: true,
+        search: true,
+        sortable: true,
+        sortName: "id",
+        columns: [{
+            field: 'id',
+            title: 'ID',
+        },   {
+                field: 'title',
+                title:'@L("Title")',
+                sortable: true,
+            },
+            {
+            field: 'status',
+                title: '@L("Status")',
+                formatter: function (val, row, index) {
+                    switch (val) {
+                        case 0: {
+                            return '未开始';
+                        }
+                        case 1: {
+                            return '调查中';
+                        }
+                        case 2: {
+                            return '已结束';
+                        }
+                    }
+                    return '';
+                }
+            },{
+                field: 'isReleased',
+                title: '@L("IsReleased")',
+                formatter: function (val, row, index) {
+                    if (val) {
+                            return '已发布';
+                     }
+                    else{
+                            return '未发布';
+                     }
+                }
+            },{
+                title: '@L("Actions")',
+                field:'actions',
+                formatter: function (val, row, index) {
+                    var str = '';
+                    var editStr = '<a href="/Survey/EditSurvey/' + row.id + '" role="button" data-toggle="tooltip" data-placement="top" title="@L("Edit")"><i class="material-icons">edit</i></a>';
+                    var statisticsStr = '<a href="/Survey/Statistics/' + row.id + '" role="button" data-toggle="tooltip" data-placement="top" title="@L("Statistics")"><i class="material-icons">timeline</i></a>';
+                    var deleteStr = '<a href="#" onclick="DeleteById(\'' + row.id + '\')" data-menu-id="' + row.id + '" data-toggle="tooltip" data-placement="top" title="@L("Delete")" > <i class="material-icons">delete_sweep</i></a>';
+
+                    str = str+statisticsStr ;
+                    return str;
+                }
+            },],
+        responseHandler: function (res) {
+            return res.result;
+        }
+    });
+</script>

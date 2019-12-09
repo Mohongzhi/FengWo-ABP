@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FengWo.BackgroundWorker</name>
+    </assembly>
+    <members>
+        <member name="T:FengWo.BackgroundWorker.Hangfire.BackgroundWorker`1">
+            <summary>
+            所有后台工作者类都应继承该类
+            </summary>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.Hangfire.BackgroundWorker`1.Start">
+            <summary>
+            任务启动
+            </summary>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.Hangfire.BackgroundWorker`1.DoWork">
+            <summary>
+            具体的任务执行
+            </summary>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.Hangfire.IBackgroudWorkerProxy.Excete``1(System.Action,FengWo.BackgroundWorker.Hangfire.WorkerConfig)">
+            <summary>
+            执行
+            </summary>
+            <param name="method"></param>
+        </member>
+        <member name="T:FengWo.BackgroundWorker.Hangfire.IBackgroundWorkerDo">
+            <summary>
+            所有的后台工作者类都应实现该接口
+            </summary>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.Hangfire.IBackgroundWorkerDo.DoWork">
+            <summary>
+            执行具体的任务
+            </summary>
+        </member>
+        <member name="T:FengWo.BackgroundWorker.Hangfire.WorkerConfig">
+            <summary>
+            工作任务配置
+            </summary>
+        </member>
+        <member name="P:FengWo.BackgroundWorker.Hangfire.WorkerConfig.IntervalSecond">
+            <summary>
+            轮询秒数
+            </summary>
+        </member>
+        <member name="P:FengWo.BackgroundWorker.Hangfire.WorkerConfig.WorkerId">
+            <summary>
+            工作唯一编号
+            </summary>
+        </member>
+        <member name="T:FengWo.BackgroundWorker.SynchronizeClassInfoJob">
+            <summary>
+            同步班级信息
+            </summary>
+        </member>
+        <member name="F:FengWo.BackgroundWorker.SynchronizeClassInfoJob._helper">
+            <summary>
+            ADO.NET支持
+            </summary>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.SynchronizeClassInfoJob.#ctor(FengWo.DBFactory.IDBHelper)">
+            <summary>
+            
+            </summary>
+            <param name="helper"></param>
+        </member>
+        <member name="M:FengWo.BackgroundWorker.SynchronizeClassInfoJob.Execute(FengWo.BackgroundWorker.SynchronizeClassInfoJobArgs)">
+            <summary>
+            执行
+            </summary>
+            <param name="args"></param>
+        </member>
+    </members>
+</doc>

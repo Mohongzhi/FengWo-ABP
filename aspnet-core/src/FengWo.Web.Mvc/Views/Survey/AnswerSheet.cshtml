@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.CurrentPageName = null; // The menu item will be active for this page.
+}
+<link href="~/node_modules/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+<link href="~/node_modules/form-making/dist/FormMaking.css" rel="stylesheet" />
+<script src="~/node_modules/element-ui/lib/index.js"></script>
+<script src="~/node_modules/form-making/dist/FormMaking.umd.min.js"></script>
+<script src="~/node_modules/form-making/public/lib/ace/src-min/ace.js"></script>
+
+<div class="row clearfix" id="lockRow">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    @L("AnswerSheet") : @ViewBag.Title
+                </h2>
+                @if (ViewBag.IsAnonymous == true)
+                {@L("AnswerSheetIsAnonymous")}
+            </div>
+            <div class="body table-responsive" id="app" v-loading="loading">
+                <el-form>
+                    <el-form-item label="校区">
+                        <el-select v-model="XQKey" placeholder="请选择">
+                            <el-option v-for="item in XQKeys"
+                                       :key="item.key"
+                                       :label="item.displayMember"
+                                       :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="院系">
+                        <el-select v-model="YXKey" placeholder="请选择" @@change="onYXChanged">
+                            <el-option v-for="item in YXKeys"
+                                       :key="item.key"
+                                       :label="item.displayMember"
+                                       :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="专业">
+                        <el-select v-model="ZYKey" placeholder="请选择" @@change="onZYChanged">
+                            <el-option v-for="item in ZYKeys"
+                                       :key="item.key"
+                                       :label="item.displayMember"
+                                       :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="班级">
+                        <el-select v-model="BJKey" placeholder="请选择">
+                            <el-option v-for="item in BJKeys"
+                                       :key="item.key"
+                                       :label="item.displayMember"
+                                       :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <fm-generate-form :data="jsonData" @@on-change="onSomeChanged"
+                                  ref="generateForm">
+                </fm-generate-form>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <button type="button" class="btn btn-primary waves-effect align-center" onclick="Submit()" data-toggle="modal">
+                        @L("Submit")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.id='@ViewBag.Id';
+</script>
+
+@section scripts
+{
+    <environment names="Development">
+        <script src="~/view-resources/Views/Survey/AnswerSheet.js" asp-append-version="true"></script>
+    </environment>
+
+    <environment names="Staging,Production">
+        <script src="~/view-resources/Views/Event/EventReporting.min.js" asp-append-version="true"></script>
+    </environment>
+}

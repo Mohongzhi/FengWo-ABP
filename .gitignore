@@ -1,0 +1,12 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/.vs
+aspnet-core/src/FengWo.Web.Mvc/App_Data/Logs/Logs.txt
+aspnet-core/.DS_Store
+aspnet-core/src/.DS_Store
+aspnet-core/src/FengWo.Web.Mvc/App_Data/Logs/Logs.txt
+aspnet-core/src/FengWo.Web.Host/App_Data/Logs/Logs.txt
+/aspnet-core/src/FengWo.Web.Mvc/App_Data/Logs/Logs.txt.1
+/aspnet-core/src/FengWo.Web.Mvc/wwwroot/uploadedfiles/20191023102903_一个号事件.xlsx

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <VersionPrefix>1.0.0.0</VersionPrefix>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>FengWo.Application</AssemblyName>
+    <PackageId>FengWo.Application</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>FengWo</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FengWo.BackgroundWorker\FengWo.BackgroundWorker.csproj" />
+    <ProjectReference Include="..\FengWo.Core\FengWo.Core.csproj" />
+    <ProjectReference Include="..\FengWo.DBFactory\FengWo.DBFactory.csproj" />
+    <ProjectReference Include="..\FengWo.Hubs\FengWo.Hubs.csproj" />
+  </ItemGroup>
+</Project>

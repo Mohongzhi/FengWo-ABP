@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <RootNamespace>FengWo</RootNamespace>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Migrations\20180726102624_Upgrade_ABP_380.cs" />
+    <Compile Remove="Migrations\20180927062408_test.cs" />
+    <Compile Remove="Migrations\20190111071724_Upgraded_To_Abp_v4_1_0.cs" />
+    <Compile Remove="Migrations\20190510090821_add_menus.cs" />
+    <Compile Remove="Migrations\20190510090821_add_menus.Designer.cs" />
+    <Compile Remove="Migrations\20190510091139_add_menus.cs" />
+    <Compile Remove="Migrations\20190510091139_add_menus.Designer.cs" />
+    <Compile Remove="Migrations\20190510093118_add_menus.cs" />
+    <Compile Remove="Migrations\20190510093118_add_menus.Designer.cs" />
+    <Compile Remove="Migrations\20190729083157_addGraduateSatisfactionRate.cs" />
+    <Compile Remove="Migrations\20190729083157_addGraduateSatisfactionRate.Designer.cs" />
+    <Compile Remove="Migrations\20190731015028_updateGraduateSatisfactionRate.cs" />
+    <Compile Remove="Migrations\20190731015028_updateGraduateSatisfactionRate.Designer.cs" />
+    <Compile Remove="Migrations\20190801075817_AddedImportBatchNumber.cs" />
+    <Compile Remove="Migrations\20190801075817_AddedImportBatchNumber.Designer.cs" />
+    <Compile Remove="Migrations\20190801082142_AddedImportBatch2.cs" />
+    <Compile Remove="Migrations\20190801082142_AddedImportBatch2.Designer.cs" />
+    <Compile Remove="Migrations\20190805033529_AddMultipleIndicators.cs" />
+    <Compile Remove="Migrations\20190805033529_AddMultipleIndicators.Designer.cs" />
+    <Compile Remove="Migrations\20190809062856_addQualifiedRateOfCourse.cs" />
+    <Compile Remove="Migrations\20190809062856_addQualifiedRateOfCourse.Designer.cs" />
+    <Compile Remove="Migrations\20190812051055_addtestclass1.cs" />
+    <Compile Remove="Migrations\20190812051055_addtestclass1.Designer.cs" />
+    <Compile Remove="Migrations\20190812101230_addtestclass2.cs" />
+    <Compile Remove="Migrations\20190812101230_addtestclass2.Designer.cs" />
+    <Compile Remove="Migrations\20190813071001_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190813071001_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190814024644_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190814024644_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190814025112_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190814025112_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190814032130_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190814032130_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190814032525_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190814032525_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190814100523_AddEntityClass1.cs" />
+    <Compile Remove="Migrations\20190814100523_AddEntityClass1.Designer.cs" />
+    <Compile Remove="Migrations\20190909093334_update-QuestionnaireAnswer.cs" />
+    <Compile Remove="Migrations\20190909093334_update-QuestionnaireAnswer.Designer.cs" />
+    <Compile Remove="Migrations\20190914072611_update-entity.cs" />
+    <Compile Remove="Migrations\20190914072611_update-entity.Designer.cs" />
+    <Compile Remove="Migrations\20190918065703_add-entity.cs" />
+    <Compile Remove="Migrations\20190918065703_add-entity.Designer.cs" />
+    <Compile Remove="Migrations\20190920100503_update-columns.cs" />
+    <Compile Remove="Migrations\20190920100503_update-columns.Designer.cs" />
+    <Compile Remove="Migrations\20191020033024_changeUserEmail.cs" />
+    <Compile Remove="Migrations\20191020033024_changeUserEmail.Designer.cs" />
+    <Compile Remove="Migrations\20191027071650_graduationrates_update.cs" />
+    <Compile Remove="Migrations\20191027071650_graduationrates_update.Designer.cs" />
+    <Compile Remove="Migrations\20191031125843_banzhurenpingjia_add.cs" />
+    <Compile Remove="Migrations\20191031125843_banzhurenpingjia_add.Designer.cs" />
+    <Compile Remove="Migrations\20191122025707_addAuditedForKim.cs" />
+    <Compile Remove="Migrations\20191122025707_addAuditedForKim.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FengWo.Core\FengWo.Core.csproj" />
+  </ItemGroup>
+</Project>
