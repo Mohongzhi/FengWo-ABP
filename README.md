@@ -1,7 +1,7 @@
 # Introduction
 
 基于模板ASP.NET Core MVC  [ASP.NET Boilerplate](https://aspnetboilerplate.com/Pages/Documents).
-Based on template ASP.NET Core MVC [ASP.NET Boilerplate] (https://aspnetboilerplate.com/Pages/Documents).
+Based on template ASP.NET Core MVC  [ASP.NET Boilerplate](https://aspnetboilerplate.com/Pages/Documents).
 UI 基于 [BSB Admin theme](https://github.com/gurayyarar/AdminBSBMaterialDesign).
 
 # Screenshots 截图
