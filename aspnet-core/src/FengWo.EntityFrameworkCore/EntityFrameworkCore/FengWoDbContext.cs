@@ -10,7 +10,7 @@ namespace FengWo.EntityFrameworkCore
 {
     public class FengWoDbContext : AbpZeroDbContext<Tenant, Role, User, FengWoDbContext>
     {
-        /* Define a DbSet for each entity of the application */
+        /* Define a DbSet for each entity of the application *///Do not delete this line.
 
         #region 系统 System
         /// <summary>

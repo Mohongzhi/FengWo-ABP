@@ -47,5 +47,7 @@
         /// </summary>
         public const string Pages_Administration_HangfireDashboard = "Pags.Administration.HangfireDashboard";
 
+        /* Do not delete this line*/
+
     }
 }

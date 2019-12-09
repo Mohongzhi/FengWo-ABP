@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Abp.AspNetCore.Mvc.Authorization;
 using FengWo.Controllers;
-using System.IO;
-using System;
 using Microsoft.AspNetCore.Hosting;
-using System.Collections.Generic;
-using System.Web;
-using System.Threading.Tasks;
 
 namespace FengWo.Web.Controllers
 {
@@ -24,7 +19,5 @@ namespace FengWo.Web.Controllers
         {
             return View();
         }
-
-       
     }
 }
