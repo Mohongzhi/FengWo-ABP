@@ -1,11 +1,8 @@
 # Introduction
 
-基于模板ASP.NET Core MVC  [ASP.NET Boilerplate](https://aspnetboilerplate.com/Pages/Documents). 创建的质量监测系统.
-User Interface 基于 [BSB Admin theme](https://github.com/gurayyarar/AdminBSBMaterialDesign).
- 
-# Download 下载模板
-
-Create & download your project from https://aspnetboilerplate.com/Templates
+基于模板ASP.NET Core MVC  [ASP.NET Boilerplate](https://aspnetboilerplate.com/Pages/Documents).
+Based on template ASP.NET Core MVC  [ASP.NET Boilerplate](https://aspnetboilerplate.com/Pages/Documents).
+UI 基于 [BSB Admin theme](https://github.com/gurayyarar/AdminBSBMaterialDesign).
 
 # Screenshots 截图
 
